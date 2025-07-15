@@ -196,6 +196,37 @@ function buildEditor({
       );
       addToCanvas(object);
     },
+    bringForward: () => {
+      canvas.getActiveObjects().forEach((obj) => {
+        canvas.bringObjectForward(obj);
+      });
+
+      canvas.requestRenderAll();
+    },
+    sendBackward: () => {
+      canvas.getActiveObjects().forEach((obj) => {
+        canvas.sendObjectBackwards(obj);
+      });
+
+      const workspace = getWorkspace();
+      if (workspace) canvas.sendObjectToBack(workspace);
+      canvas.requestRenderAll();
+    },
+    changeOpacity: (value: number) => {
+      canvas.getActiveObjects().forEach((obj) => {
+        obj.set("opacity", value);
+      });
+      canvas.requestRenderAll();
+    },
+    getActiveOpacity: () => {
+      const selectedObject = selectedObjects[0];
+
+      if (!selectedObject) {
+        return 1;
+      }
+      const value = selectedObject.get("opacity") || 1;
+      return value;
+    },
     fillColor,
     strokeColor,
     strokeWidth,

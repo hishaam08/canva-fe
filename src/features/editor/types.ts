@@ -49,6 +49,10 @@ export interface Editor {
   changeStrokeDashArray: (dashArray: number[]) => void;
   getActiveStrokeWidth: () => number;
   getActiveStrokeDashArray: () => number[];
+  bringForward: () => void;
+  sendBackward: () => void;
+  changeOpacity: (value: number) => void;
+  getActiveOpacity: () => number;
 }
 
 export interface UseEditorProps {
