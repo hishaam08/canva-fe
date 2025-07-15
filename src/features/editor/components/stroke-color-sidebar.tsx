@@ -1,22 +1,22 @@
-import { ActiveTool, Editor, FILL_COLOR } from "@/features/editor/types";
+import { ActiveTool, Editor, STROKE_COLOR } from "@/features/editor/types";
 import { ToolSidebarClose } from "@/features/editor/components/tool-sidebar-close";
 import { ToolSidebarHeader } from "@/features/editor/components/tool-sidebar-header";
+import { ColorPicker } from "@/features/editor/components/color-picker";
 
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ColorPicker } from "./color-picker";
 
-interface FillColorSidebarProps {
+interface StrokeColorSidebarProps {
   editor: Editor | undefined;
   activeTool: ActiveTool;
   onChangeActiveTool: (tool: ActiveTool) => void;
 }
 
-export const FillColorSidebar = ({
+export const StrokeColorSidebar = ({
   editor,
   activeTool,
   onChangeActiveTool,
-}: FillColorSidebarProps) => {
+}: StrokeColorSidebarProps) => {
   const selectedObjects = editor?.canvas.getActiveObjects();
 
   const getProperty = (property: string) => {
@@ -24,26 +24,26 @@ export const FillColorSidebar = ({
     return selectedObjects[0].get(property);
   };
 
-  const value = getProperty("fill") || FILL_COLOR;
+  const value = getProperty("stroke") || STROKE_COLOR;
 
   const onClose = () => {
     onChangeActiveTool("select");
   };
 
   const onChange = (value: string) => {
-    editor?.changeFillColor(value);
+    editor?.changeStrokeColor(value);
   };
 
   return (
     <aside
       className={cn(
         "bg-white relative border-r z-[40] w-[360px] h-full flex flex-col",
-        activeTool === "fill" ? "visible" : "hidden"
+        activeTool === "stroke-color" ? "visible" : "hidden"
       )}
     >
       <ToolSidebarHeader
-        title="Fill color"
-        description="Add fill color to your element"
+        title="Stroke color"
+        description="Add stroke color to your element"
       />
       <ScrollArea>
         <div className="p-4 space-y-6">

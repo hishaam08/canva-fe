@@ -2,6 +2,7 @@ import { ActiveTool, Editor } from "../types";
 import { Hint } from "@/components/hint";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { BsBorderWidth } from "react-icons/bs";
 
 interface ToolbarProps {
   editor: Editor | undefined;
@@ -14,11 +15,11 @@ function Toolbar({ editor, activeTool, onChangeActiveTool }: ToolbarProps) {
 
   const getProperty = (property: string) => {
     if (!selectedObjects || selectedObjects.length === 0) return null;
-    console.log("Selected objects:", selectedObjects[0].get(property));
     return selectedObjects[0].get(property);
   };
 
   const fillColor = getProperty("fill");
+  const strokeColor = getProperty("stroke");
   //   const [properties, setProperties] = useState({ fillColor });
 
   if (editor === undefined || editor?.selectedObjects.length === 0) {
@@ -44,6 +45,33 @@ function Toolbar({ editor, activeTool, onChangeActiveTool }: ToolbarProps) {
                   typeof fillColor === "string" ? fillColor : "black",
               }}
             ></div>
+          </Button>
+        </Hint>
+      </div>
+      <div className="flex items-center h-full justify-center">
+        <Hint label="Stroke color" side="bottom" sideOffset={5}>
+          <Button
+            onClick={() => onChangeActiveTool("stroke-color")}
+            size="icon"
+            variant="ghost"
+            className={cn(activeTool === "stroke-color" && "bg-gray-100")}
+          >
+            <div
+              className="rounded-sm size-4 border-2 bg-white"
+              style={{ borderColor: strokeColor }}
+            />
+          </Button>
+        </Hint>
+      </div>
+      <div className="flex items-center h-full justify-center">
+        <Hint label="Stroke width" side="bottom" sideOffset={5}>
+          <Button
+            onClick={() => onChangeActiveTool("stroke-width")}
+            size="icon"
+            variant="ghost"
+            className={cn(activeTool === "stroke-width" && "bg-gray-100")}
+          >
+            <BsBorderWidth className="size-4" />
           </Button>
         </Hint>
       </div>

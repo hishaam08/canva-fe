@@ -27,6 +27,8 @@ export type BuildEditorProps = {
   setStrokeColor: (color: string) => void;
   setStrokeWidth: (width: number) => void;
   selectedObjects: Object[];
+  setStrokeDashArray: (dashArray: number[]) => void;
+  strokeDashArray: number[];
 };
 
 export interface Editor {
@@ -44,8 +46,24 @@ export interface Editor {
   strokeWidth: number;
   canvas: Canvas;
   selectedObjects: Object[];
-
+  changeStrokeDashArray: (dashArray: number[]) => void;
+  getActiveStrokeWidth: () => number;
+  getActiveStrokeDashArray: () => number[];
 }
+
+export interface UseEditorProps {
+  clearSelectionCallback: () => void;
+}
+
+export const selectionDependentTools = [
+  "fill",
+  "font",
+  "filter",
+  "opacity",
+  "remove-bg",
+  "stroke-color",
+  "stroke-width",
+];
 
 export const FILL_COLOR = "rgba(0,0,0,1)";
 export const STROKE_COLOR = "rgba(0,0,0,1)";

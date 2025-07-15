@@ -17,8 +17,10 @@ import {
   FILL_COLOR,
   RECTANGLE_OPTIONS,
   STROKE_COLOR,
+  STROKE_DASH_ARRAY,
   STROKE_WIDTH,
   TRIANGLE_OPTIONS,
+  UseEditorProps,
 } from "../types";
 import { useCanvasEvents } from "./use-canvas-events";
 import { isTextType } from "../utils";
@@ -32,6 +34,8 @@ function buildEditor({
   setStrokeColor,
   setStrokeWidth,
   selectedObjects,
+  setStrokeDashArray,
+  strokeDashArray,
 }: BuildEditorProps): Editor {
   const getWorkspace = () => {
     return canvas
@@ -79,8 +83,36 @@ function buildEditor({
       setStrokeWidth(width);
       canvas.getActiveObjects().forEach((obj) => {
         obj.set("strokeWidth", width);
+        obj.setCoords();
       });
       canvas.requestRenderAll();
+    },
+    changeStrokeDashArray: (value: number[]) => {
+      setStrokeDashArray(value);
+      canvas.getActiveObjects().forEach((object) => {
+        object.set({ strokeDashArray: value });
+      });
+      canvas.renderAll();
+    },
+    getActiveStrokeWidth: () => {
+      const selectedObject = selectedObjects[0];
+
+      if (!selectedObject) {
+        return strokeWidth;
+      }
+
+      const value = selectedObject.get("strokeWidth") || strokeWidth;
+
+      return value;
+    },
+    getActiveStrokeDashArray: () => {
+      const selectedObject = selectedObjects[0];
+      if (!selectedObject) {
+        return strokeDashArray;
+      }
+
+      const value = selectedObject.get("strokeDashArray") || [];
+      return value;
     },
     addCircle: () => {
       const circle = new Circle({
@@ -172,7 +204,7 @@ function buildEditor({
   };
 }
 
-export const useEditor = () => {
+export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
   const [canvas, setCanvas] = useState<Canvas | null>(null);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
@@ -180,9 +212,11 @@ export const useEditor = () => {
   const [fillColor, setFillColor] = useState(FILL_COLOR);
   const [strokeColor, setStrokeColor] = useState(STROKE_COLOR);
   const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTH);
+  const [strokeDashArray, setStrokeDashArray] =
+    useState<number[]>(STROKE_DASH_ARRAY);
 
   useAutoResize({ canvas, container });
-  useCanvasEvents({ canvas, setSelectedObjects });
+  useCanvasEvents({ canvas, setSelectedObjects, clearSelectionCallback });
 
   const editor = useMemo(() => {
     if (canvas)
@@ -195,10 +229,19 @@ export const useEditor = () => {
         setStrokeColor,
         setStrokeWidth,
         selectedObjects,
+        setStrokeDashArray,
+        strokeDashArray,
       });
 
     return undefined;
-  }, [canvas, fillColor, strokeColor, strokeWidth, selectedObjects]);
+  }, [
+    canvas,
+    fillColor,
+    strokeColor,
+    strokeWidth,
+    selectedObjects,
+    strokeDashArray,
+  ]);
 
   const init = useCallback(
     ({
@@ -210,6 +253,28 @@ export const useEditor = () => {
     }) => {
       Rect.ownDefaults = {
         ...Rect.ownDefaults,
+        cornerColor: "#fff",
+        cornerStyle: "circle",
+        transparentCorners: false,
+        borderColor: "#3b82f6",
+        borderScaleFactor: 1.5,
+        borderOpacityWhenMoving: 1,
+        cornerStrokeColor: "#3b82f6",
+      };
+
+      Circle.ownDefaults = {
+        ...Circle.ownDefaults,
+        cornerColor: "#fff",
+        cornerStyle: "circle",
+        transparentCorners: false,
+        borderColor: "#3b82f6",
+        borderScaleFactor: 1.5,
+        borderOpacityWhenMoving: 1,
+        cornerStrokeColor: "#3b82f6",
+      };
+
+      Polygon.ownDefaults = {
+        ...Polygon.ownDefaults,
         cornerColor: "#fff",
         cornerStyle: "circle",
         transparentCorners: false,

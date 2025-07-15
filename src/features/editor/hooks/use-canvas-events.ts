@@ -4,6 +4,7 @@ import { useEffect } from "react";
 interface UseCanvasEventsProps {
   canvas: Canvas | null;
   setSelectedObjects: (objects: Object[]) => void;
+  clearSelectionCallback: () => void;
 }
 
 interface SelectionEvent {
@@ -14,6 +15,7 @@ interface SelectionEvent {
 export const useCanvasEvents = ({
   canvas,
   setSelectedObjects,
+  clearSelectionCallback,
 }: UseCanvasEventsProps) => {
   useEffect(() => {
     if (canvas) {
@@ -26,6 +28,7 @@ export const useCanvasEvents = ({
       };
 
       const handleSelectionCleared = () => {
+        clearSelectionCallback();
         setSelectedObjects([]);
       };
 
@@ -41,5 +44,5 @@ export const useCanvasEvents = ({
         }
       };
     }
-  }, [canvas, setSelectedObjects]);
+  }, [canvas, setSelectedObjects, clearSelectionCallback]);
 };
