@@ -6,6 +6,7 @@ import {
   Polygon,
   Rect,
   Shadow,
+  Textbox,
   Triangle,
 } from "fabric";
 import { useAutoResize } from "./use-auto-resize";
@@ -15,10 +16,12 @@ import {
   DIAMOND_OPTIONS,
   Editor,
   FILL_COLOR,
+  FONT_FAMILY,
   RECTANGLE_OPTIONS,
   STROKE_COLOR,
   STROKE_DASH_ARRAY,
   STROKE_WIDTH,
+  TEXT_OPTIONS,
   TRIANGLE_OPTIONS,
   UseEditorProps,
 } from "../types";
@@ -36,6 +39,8 @@ function buildEditor({
   selectedObjects,
   setStrokeDashArray,
   strokeDashArray,
+  fontFamily,
+  setFontFamily,
 }: BuildEditorProps): Editor {
   const getWorkspace = () => {
     return canvas
@@ -59,6 +64,15 @@ function buildEditor({
   };
 
   return {
+    changeFontFamily: (value: string) => {
+      setFontFamily(value);
+      canvas.getActiveObjects().forEach((obj) => {
+        if (isTextType(obj.type)) {
+          obj.set({ fontFamily: value });
+        }
+      });
+      canvas.requestRenderAll();
+    },
     changeFillColor: (color: string) => {
       setFillColor(color);
       canvas.getActiveObjects().forEach((obj) => {
@@ -227,11 +241,28 @@ function buildEditor({
       const value = selectedObject.get("opacity") || 1;
       return value;
     },
+    getActiveFontFamily: () => {
+      const selectedObject = selectedObjects[0];
+      if (selectedObject) {
+        return fontFamily;
+      }
+      return FONT_FAMILY;
+    },
+    addText: (value, options) => {
+      const object = new Textbox(value, {
+        ...TEXT_OPTIONS,
+        fillColor: fillColor,
+        fontFamily: fontFamily,
+        ...options,
+      });
+      addToCanvas(object);
+    },
     fillColor,
     strokeColor,
     strokeWidth,
     canvas,
     selectedObjects,
+    fontFamily,
   };
 }
 
@@ -240,6 +271,7 @@ export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
 
+  const [fontFamily, setFontFamily] = useState(FONT_FAMILY);
   const [fillColor, setFillColor] = useState(FILL_COLOR);
   const [strokeColor, setStrokeColor] = useState(STROKE_COLOR);
   const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTH);
@@ -262,6 +294,8 @@ export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
         selectedObjects,
         setStrokeDashArray,
         strokeDashArray,
+        fontFamily,
+        setFontFamily,
       });
 
     return undefined;
@@ -272,6 +306,7 @@ export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
     strokeWidth,
     selectedObjects,
     strokeDashArray,
+    fontFamily,
   ]);
 
   const init = useCallback(
@@ -325,12 +360,6 @@ export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
         shadow: new Shadow({ color: "rgba(0,0,0,0.8)", blur: 5 }),
       });
 
-      const test = new Rect({
-        height: 100,
-        width: 100,
-        fill: "black",
-      });
-
       initialCanvas.setHeight(initialContainer.offsetHeight);
       initialCanvas.setWidth(initialContainer.offsetWidth);
 
@@ -341,8 +370,8 @@ export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
       setCanvas(initialCanvas);
       setContainer(initialContainer);
 
-      initialCanvas.add(test);
-      initialCanvas.centerObject(test);
+      // initialCanvas.add(test);
+      // initialCanvas.centerObject(test);
     },
     []
   );

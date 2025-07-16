@@ -1,4 +1,5 @@
-import { Canvas, Object } from "fabric";
+import { Canvas, Object, TextboxProps, TOptions } from "fabric";
+import { ITextboxOptions } from "fabric/fabric-impl";
 import * as material from "material-colors";
 
 export type ActiveTool =
@@ -29,6 +30,8 @@ export type BuildEditorProps = {
   selectedObjects: Object[];
   setStrokeDashArray: (dashArray: number[]) => void;
   strokeDashArray: number[];
+  fontFamily: string;
+  setFontFamily: (fontFamily: string) => void;
 };
 
 export interface Editor {
@@ -53,6 +56,10 @@ export interface Editor {
   sendBackward: () => void;
   changeOpacity: (value: number) => void;
   getActiveOpacity: () => number;
+  addText: (value: string, options?: TOptions<TextboxProps>) => void;
+  changeFontFamily: (value: string) => void;
+  fontFamily: string;
+  getActiveFontFamily: () => string;
 }
 
 export interface UseEditorProps {
@@ -69,6 +76,27 @@ export const selectionDependentTools = [
   "stroke-width",
 ];
 
+export const fonts = [
+  "Arial",
+  "Arial Black",
+  "Bookman",
+  "Brush Script MT",
+  "Comic Sans MS",
+  "Courier New",
+  "Garamond",
+  "Georgia",
+  "Geneva",
+  "Helvetica",
+  "Impact",
+  "Lucida Console",
+  "Lucida Sans Unicode",
+  "Palatino",
+  "Tahoma",
+  "Times New Roman",
+  "Trebuchet MS",
+  "Verdana",
+];
+
 export const FILL_COLOR = "rgba(0,0,0,1)";
 export const STROKE_COLOR = "rgba(0,0,0,1)";
 export const STROKE_WIDTH = 2;
@@ -77,14 +105,13 @@ export const FONT_FAMILY = "Arial";
 export const FONT_SIZE = 32;
 export const FONT_WEIGHT = 400;
 
-// export const CIRCLE_OPTIONS = {
-//   radius: 150,
-//   height: 100,
-//   width: 100,
-//   fill: FILL_COLOR,
-//   stroke: STROKE_COLOR,
-//   strokeWidth: STROKE_WIDTH,
-// };
+export const TEXT_OPTIONS = {
+  left: 100,
+  top: 100,
+  fill: FILL_COLOR,
+  fontSize: FONT_SIZE,
+  fontFamily: FONT_FAMILY,
+};
 
 export const CIRCLE_OPTIONS = {
   radius: 225,
