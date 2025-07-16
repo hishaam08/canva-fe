@@ -17,6 +17,8 @@ import {
   Editor,
   FILL_COLOR,
   FONT_FAMILY,
+  FONT_SIZE,
+  FONT_WEIGHT,
   RECTANGLE_OPTIONS,
   STROKE_COLOR,
   STROKE_DASH_ARRAY,
@@ -73,6 +75,14 @@ function buildEditor({
       });
       canvas.requestRenderAll();
     },
+    changeFontStyle: (value: string) => {
+      canvas.getActiveObjects().forEach((object) => {
+        if (isTextType(object.type)) {
+          object.set({ fontStyle: value });
+        }
+      });
+      canvas.requestRenderAll();
+    },
     changeFillColor: (color: string) => {
       setFillColor(color);
       canvas.getActiveObjects().forEach((obj) => {
@@ -106,7 +116,7 @@ function buildEditor({
       canvas.getActiveObjects().forEach((object) => {
         object.set({ strokeDashArray: value });
       });
-      canvas.renderAll();
+      canvas.requestRenderAll();
     },
     getActiveStrokeWidth: () => {
       const selectedObject = selectedObjects[0];
@@ -232,6 +242,14 @@ function buildEditor({
       });
       canvas.requestRenderAll();
     },
+    changeFontWeight: (value: number) => {
+      canvas.getActiveObjects().forEach((obj) => {
+        if (isTextType(obj.type)) {
+          obj.set({ fontWeight: value });
+        }
+      });
+      canvas.requestRenderAll();
+    },
     getActiveOpacity: () => {
       const selectedObject = selectedObjects[0];
 
@@ -244,18 +262,117 @@ function buildEditor({
     getActiveFontFamily: () => {
       const selectedObject = selectedObjects[0];
       if (selectedObject) {
-        return fontFamily;
+        return selectedObject.get("fontFamily") || FONT_FAMILY;
       }
       return FONT_FAMILY;
+    },
+    getActiveFontWeight: () => {
+      const selectedObject = selectedObjects[0];
+      if (selectedObject) {
+        return selectedObject.get("fontWeight") || FONT_WEIGHT;
+      }
+      return FONT_WEIGHT;
+    },
+    getActiveFontStyle: () => {
+      const selectedObject = selectedObjects[0];
+
+      if (!selectedObject) {
+        return "normal";
+      }
+
+      const value = selectedObject.get("fontStyle") || "normal";
+
+      return value;
     },
     addText: (value, options) => {
       const object = new Textbox(value, {
         ...TEXT_OPTIONS,
-        fillColor: fillColor,
+        fill: fillColor,
         fontFamily: fontFamily,
         ...options,
       });
       addToCanvas(object);
+    },
+    changeTextAlign: (value: string) => {
+      canvas.getActiveObjects().forEach((object) => {
+        if (isTextType(object.type)) {
+          object.set({ textAlign: value });
+        }
+      });
+      canvas.requestRenderAll();
+    },
+    getActiveTextAlign: () => {
+      const selectedObject = selectedObjects[0];
+
+      if (!selectedObject) {
+        return "left";
+      }
+
+      const value = selectedObject.get("textAlign") || "left";
+
+      return value;
+    },
+    changeFontUnderline: (value: boolean) => {
+      canvas.getActiveObjects().forEach((object) => {
+        if (isTextType(object.type)) {
+          object.set({ underline: value });
+        }
+      });
+      canvas.requestRenderAll();
+    },
+    getActiveFontUnderline: () => {
+      const selectedObject = selectedObjects[0];
+
+      if (!selectedObject) {
+        return false;
+      }
+
+      const value = selectedObject.get("underline") || false;
+
+      return value;
+    },
+    changeFontLinethrough: (value: boolean) => {
+      canvas.getActiveObjects().forEach((object) => {
+        if (isTextType(object.type)) {
+          object.set({ linethrough: value });
+        }
+      });
+      canvas.requestRenderAll();
+    },
+    getActiveFontLinethrough: () => {
+      const selectedObject = selectedObjects[0];
+
+      if (!selectedObject) {
+        return false;
+      }
+
+      const value = selectedObject.get("linethrough") || false;
+
+      return value;
+    },
+    changeFontSize: (value: number) => {
+      canvas.getActiveObjects().forEach((object) => {
+        if (isTextType(object.type)) {
+          object.set({ fontSize: value });
+        }
+      });
+      canvas.requestRenderAll();
+    },
+    getActiveFontSize: () => {
+      const selectedObject = selectedObjects[0];
+
+      if (!selectedObject) {
+        return FONT_SIZE;
+      }
+
+      const value = selectedObject.get("fontSize") || FONT_SIZE;
+
+      return value;
+    },
+    delete: () => {
+      canvas.getActiveObjects().forEach((object) => canvas.remove(object));
+      canvas.discardActiveObject();
+      canvas.renderAll();
     },
     fillColor,
     strokeColor,

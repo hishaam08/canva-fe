@@ -60,6 +60,19 @@ export interface Editor {
   changeFontFamily: (value: string) => void;
   fontFamily: string;
   getActiveFontFamily: () => string;
+  getActiveFontWeight: () => number;
+  changeFontWeight: (value: number) => void;
+  changeFontStyle: (value: string) => void
+  getActiveFontStyle: () => string;
+  changeTextAlign: (value: string) => void;
+  getActiveTextAlign: () => string;
+  changeFontUnderline: (value: boolean) => void;
+  getActiveFontUnderline: () => boolean;
+  changeFontLinethrough: (value: boolean) => void;
+  getActiveFontLinethrough: () => boolean;
+  changeFontSize: (value: number) => void
+  getActiveFontSize: () => number;
+  delete: () => void;
 }
 
 export interface UseEditorProps {
@@ -108,7 +121,7 @@ export const FONT_WEIGHT = 400;
 export const TEXT_OPTIONS = {
   left: 100,
   top: 100,
-  fill: FILL_COLOR,
+  // fill: FILL_COLOR,
   fontSize: FONT_SIZE,
   fontFamily: FONT_FAMILY,
 };
