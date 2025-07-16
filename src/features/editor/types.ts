@@ -1,5 +1,4 @@
 import { Canvas, Object, TextboxProps, TOptions } from "fabric";
-import { ITextboxOptions } from "fabric/fabric-impl";
 import * as material from "material-colors";
 
 export type ActiveTool =
