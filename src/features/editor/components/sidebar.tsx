@@ -9,7 +9,6 @@ import {
   Pencil,
   Settings,
   Shapes,
-  Sparkles,
   Type,
 } from "lucide-react";
 
@@ -51,12 +50,6 @@ function Sidebar({ activeTool, onChangeActiveTool }: SidebarProps) {
           label="Draw"
           isActive={activeTool === "draw"}
           onClick={() => onChangeActiveTool("draw")}
-        />
-        <SidebarItem
-          icon={Sparkles}
-          label="AI"
-          isActive={activeTool === "ai"}
-          onClick={() => onChangeActiveTool("ai")}
         />
         <SidebarItem
           icon={Settings}

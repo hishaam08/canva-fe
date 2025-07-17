@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import {
   Canvas,
   Circle,
+  Image,
   Object,
   Polygon,
   Rect,
@@ -28,7 +29,7 @@ import {
   UseEditorProps,
 } from "../types";
 import { useCanvasEvents } from "./use-canvas-events";
-import { isTextType } from "../utils";
+import { createFilter, isTextType } from "../utils";
 
 function buildEditor({
   canvas,
@@ -373,6 +374,38 @@ function buildEditor({
       canvas.getActiveObjects().forEach((object) => canvas.remove(object));
       canvas.discardActiveObject();
       canvas.renderAll();
+    },
+    changeImageFilter: (value: string) => {
+      const objects = canvas.getActiveObjects();
+      objects.forEach((object) => {
+        if (object.type === "image") {
+          const imageObject = object as Image;
+          // const filter = new filters.Grayscale();
+          const effect = createFilter(value);
+
+          // imageObject.filters = [filter];
+
+          imageObject.filters = effect ? [effect] : [];
+          imageObject.applyFilters();
+          canvas.renderAll();
+        }
+      });
+    },
+    addImage: async (value: string) => {
+      const workspace = getWorkspace();
+
+      try {
+        const image = await Image.fromURL(value, {
+          crossOrigin: "anonymous",
+        });
+
+        image.scaleToWidth(workspace?.width || 0);
+        image.scaleToHeight(workspace?.height || 0);
+
+        addToCanvas(image);
+      } catch (error) {
+        console.error("Failed to load image", error);
+      }
     },
     fillColor,
     strokeColor,

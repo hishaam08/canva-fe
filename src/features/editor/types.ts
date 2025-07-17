@@ -61,7 +61,7 @@ export interface Editor {
   getActiveFontFamily: () => string;
   getActiveFontWeight: () => number;
   changeFontWeight: (value: number) => void;
-  changeFontStyle: (value: string) => void
+  changeFontStyle: (value: string) => void;
   getActiveFontStyle: () => string;
   changeTextAlign: (value: string) => void;
   getActiveTextAlign: () => string;
@@ -69,14 +69,42 @@ export interface Editor {
   getActiveFontUnderline: () => boolean;
   changeFontLinethrough: (value: boolean) => void;
   getActiveFontLinethrough: () => boolean;
-  changeFontSize: (value: number) => void
+  changeFontSize: (value: number) => void;
   getActiveFontSize: () => number;
   delete: () => void;
+  addImage: (url: string) => Promise<void>;
+  changeImageFilter: (filter: string) => void;
 }
 
 export interface UseEditorProps {
   clearSelectionCallback: () => void;
 }
+
+export const filters = [
+  "none",
+  "polaroid",
+  "sepia",
+  "kodachrome",
+  "contrast",
+  "brightness",
+  "greyscale",
+  "brownie",
+  "vintage",
+  "technicolor",
+  "pixelate",
+  "invert",
+  "blur",
+  "sharpen",
+  "emboss",
+  "removecolor",
+  "blacknwhite",
+  "vibrance",
+  "blendcolor",
+  "huerotate",
+  "resize",
+  "saturation",
+  "gamma",
+];
 
 export const selectionDependentTools = [
   "fill",
