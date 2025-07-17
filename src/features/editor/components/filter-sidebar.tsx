@@ -5,6 +5,7 @@ import { ToolSidebarHeader } from "@/features/editor/components/tool-sidebar-hea
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { useRef } from "react";
 
 interface FilterSidebarProps {
   editor: Editor | undefined;
@@ -20,6 +21,8 @@ export const FilterSidebar = ({
   const onClose = () => {
     onChangeActiveTool("select");
   };
+
+  const currentFilter = useRef<string>("none");
 
   return (
     <aside
@@ -40,7 +43,11 @@ export const FilterSidebar = ({
               variant="secondary"
               size="lg"
               className="w-full h-16 justify-start text-left"
-              onClick={() => editor?.changeImageFilter(filter)}
+              onMouseEnter={() => editor?.changeImageFilter(filter)}
+              onMouseLeave={() =>
+                editor?.changeImageFilter(currentFilter.current)
+              }
+              onClick={() => (currentFilter.current = filter)}
             >
               {filter}
             </Button>

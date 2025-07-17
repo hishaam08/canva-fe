@@ -32,7 +32,6 @@ export const AiSidebar = ({
       {
         onSuccess: (response) => {
           if (response.success && response.imageUrl) {
-            console.log("Image generated:", response.imageUrl);
             // editor?.addImage(response.imageUrl);
           }
         },

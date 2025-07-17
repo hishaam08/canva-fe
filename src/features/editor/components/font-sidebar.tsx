@@ -1,10 +1,16 @@
-import { ActiveTool, Editor, fonts } from "@/features/editor/types";
+import {
+  ActiveTool,
+  Editor,
+  FONT_FAMILY,
+  fonts,
+} from "@/features/editor/types";
 import { ToolSidebarClose } from "@/features/editor/components/tool-sidebar-close";
 import { ToolSidebarHeader } from "@/features/editor/components/tool-sidebar-header";
 
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { useRef } from "react";
 
 interface FontSidebarProps {
   editor: Editor | undefined;
@@ -17,7 +23,8 @@ export const FontSidebar = ({
   activeTool,
   onChangeActiveTool,
 }: FontSidebarProps) => {
-  const value = editor?.getActiveFontFamily();
+  const value = editor?.getActiveFontFamily() || FONT_FAMILY;
+  const currentFont = useRef<string>(value);
 
   const onClose = () => {
     onChangeActiveTool("select");
@@ -47,7 +54,12 @@ export const FontSidebar = ({
                 fontSize: "16px",
                 padding: "8px 16px",
               }}
-              onClick={() => editor?.changeFontFamily(font)}
+              onMouseEnter={() => editor?.changeFontFamily(font)}
+              onMouseLeave={() => editor?.changeFontFamily(currentFont.current)}
+              onClick={() => {
+                currentFont.current = font;
+                // editor?.changeFontFamily(font);
+              }}
             >
               {font}
             </Button>

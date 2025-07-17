@@ -44,7 +44,6 @@ export const useGenerateImage = () => {
   return useMutation({
     mutationFn: generateImage,
     onSuccess: (data) => {
-      console.log('Image generated:', data.imageUrl);
       queryClient.invalidateQueries({ queryKey: ['images'] });
     },
     onError: (error) => {
