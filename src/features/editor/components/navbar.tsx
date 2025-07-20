@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Hint } from "@/components/hint";
 import { BsCloudCheck } from "react-icons/bs";
 import { ActiveTool, Editor } from "../types";
+import { UserButton } from "@/features/auth/components/user-button";
 
 interface NavbarProps {
   activeTool: ActiveTool;
@@ -190,6 +191,7 @@ function Navbar({ activeTool, onChangeActiveTool, editor }: NavbarProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <UserButton />
         </div>
       </div>
     </nav>
