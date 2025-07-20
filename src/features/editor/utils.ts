@@ -15,6 +15,32 @@ export function rgbaObjectToString(rgba: RGBColor | "transparent") {
   return `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${alpha})`;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function transformText(objects: any) {
+  if (!objects) return;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  objects.forEach((item: any) => {
+    if (item.objects) {
+      transformText(item.objects);
+    } else {
+      if (item.type === "text") {
+        item.type = "textbox";
+      }
+    }
+  });
+}
+
+export function downloadFile(file: string, type: string) {
+  const anchorElement = document.createElement("a");
+
+  anchorElement.href = file;
+  anchorElement.download = `shapy-image.${type}`;
+  document.body.appendChild(anchorElement);
+  anchorElement.click();
+  anchorElement.remove();
+}
+
 export const createFilter = (value: string) => {
   let effect;
 

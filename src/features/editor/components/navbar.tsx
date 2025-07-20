@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Logo } from "./logo";
+import { useFilePicker } from "use-file-picker";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -21,15 +22,31 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Hint } from "@/components/hint";
 import { BsCloudCheck } from "react-icons/bs";
-import { ActiveTool } from "../types";
+import { ActiveTool, Editor } from "../types";
 
 interface NavbarProps {
   activeTool: ActiveTool;
   onChangeActiveTool: (tool: ActiveTool) => void;
+  editor: Editor | undefined;
 }
 
-function Navbar({ activeTool, onChangeActiveTool }: NavbarProps) {
+function Navbar({ activeTool, onChangeActiveTool, editor }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { openFilePicker } = useFilePicker({
+    accept: ".json",
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onFilesSuccessfullySelected: ({ plainFiles }: any) => {
+      if (plainFiles && plainFiles.length > 0) {
+        const file = plainFiles[0];
+        const reader = new FileReader();
+        reader.readAsText(file, "UTF-8");
+        reader.onload = () => {
+          editor?.loadJson(reader.result as string);
+        };
+      }
+    },
+  });
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
@@ -51,7 +68,12 @@ function Navbar({ activeTool, onChangeActiveTool }: NavbarProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="min-w-60">
-            <DropdownMenuItem className="flex items-center gap-x-2">
+            <DropdownMenuItem
+              className="flex items-center gap-x-2"
+              onClick={() => {
+                openFilePicker();
+              }}
+            >
               <CiFileOn className="size-8" />
               <div>
                 <p>Open</p>
@@ -72,18 +94,34 @@ function Navbar({ activeTool, onChangeActiveTool }: NavbarProps) {
             onClick={() => {
               onChangeActiveTool("select");
             }}
-            className={cn(activeTool === 'select' && "bg-gray-100")}
+            className={cn(activeTool === "select" && "bg-gray-100")}
           >
             <MousePointerClick className="size-4" />
           </Button>
         </Hint>
         <Hint label="Undo" side="bottom" sideOffset={2}>
-          <Button variant={"ghost"} size="icon" onClick={() => {}} className="">
+          <Button
+            variant={"ghost"}
+            size="icon"
+            onClick={async () => {
+              await editor?.onUndo();
+            }}
+            className=""
+            disabled={!editor?.canUndo()}
+          >
             <Undo2 className="size-4" />
           </Button>
         </Hint>
         <Hint label="Redo" side="bottom" sideOffset={2}>
-          <Button variant={"ghost"} size="icon" onClick={() => {}} className="">
+          <Button
+            variant={"ghost"}
+            size="icon"
+            onClick={async () => {
+              await editor?.onRedo();
+            }}
+            className=""
+            disabled={!editor?.canRedo()}
+          >
             <Redo2 className="size-4" />
           </Button>
         </Hint>
@@ -102,7 +140,10 @@ function Navbar({ activeTool, onChangeActiveTool }: NavbarProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-60">
-              <DropdownMenuItem className="flex items-center gap-x-2">
+              <DropdownMenuItem
+                className="flex items-center gap-x-2"
+                onClick={() => editor?.saveJson()}
+              >
                 <CiFileOn className="size-8" />
                 <div>
                   <p>JSON</p>
@@ -111,7 +152,10 @@ function Navbar({ activeTool, onChangeActiveTool }: NavbarProps) {
                   </p>
                 </div>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center gap-x-2">
+              <DropdownMenuItem
+                className="flex items-center gap-x-2"
+                onClick={() => editor?.savePng()}
+              >
                 <CiFileOn className="size-8" />
                 <div>
                   <p>PNG</p>
@@ -120,7 +164,10 @@ function Navbar({ activeTool, onChangeActiveTool }: NavbarProps) {
                   </p>
                 </div>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center gap-x-2">
+              <DropdownMenuItem
+                className="flex items-center gap-x-2"
+                onClick={() => editor?.saveJpg()}
+              >
                 <CiFileOn className="size-8" />
                 <div>
                   <p>JPG</p>
@@ -129,10 +176,13 @@ function Navbar({ activeTool, onChangeActiveTool }: NavbarProps) {
                   </p>
                 </div>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center gap-x-2">
+              <DropdownMenuItem
+                className="flex items-center gap-x-2"
+                onClick={() => editor?.saveSvg()}
+              >
                 <CiFileOn className="size-8" />
                 <div>
-                  <p>JPG</p>
+                  <p>SVG</p>
                   <p className="text-xs text-muted-foreground">
                     Best for editing software
                   </p>

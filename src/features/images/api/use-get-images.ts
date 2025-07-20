@@ -1,8 +1,8 @@
 import { unsplash } from "@/lib/unsplash";
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetImages = (enabled: boolean) => {
-  console.log("enabled", enabled);
+
+export const useGetImages = () => {
   const query = useQuery({
     queryKey: ["images"],
     queryFn: async () => {
@@ -23,7 +23,8 @@ export const useGetImages = (enabled: boolean) => {
 
       return response;
     },
-    enabled,
+    refetchOnMount: false,
+    staleTime: 100000
   });
 
   return query;

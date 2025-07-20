@@ -9,6 +9,7 @@ import {
   ArrowDown,
   ArrowUp,
   ChevronDown,
+  Copy,
   Trash,
 } from "lucide-react";
 import { TbColorFilter } from "react-icons/tb";
@@ -361,6 +362,20 @@ function Toolbar({ editor, activeTool, onChangeActiveTool }: ToolbarProps) {
             className={cn(activeTool === "opacity" && "bg-gray-100")}
           >
             <RxTransparencyGrid className="size-4" />
+          </Button>
+        </Hint>
+      </div>
+      <div className="flex items-center h-full justify-center">
+        <Hint label="Duplicate" side="bottom" sideOffset={5}>
+          <Button
+            onClick={async () => {
+              await editor?.onCopy();
+              await editor?.onPaste();
+            }}
+            size="icon"
+            variant="ghost"
+          >
+            <Copy className="size-4" />
           </Button>
         </Hint>
       </div>

@@ -31,6 +31,14 @@ export type BuildEditorProps = {
   strokeDashArray: number[];
   fontFamily: string;
   setFontFamily: (fontFamily: string) => void;
+  copy: () => Promise<void>;
+  paste: () => Promise<void>;
+  autoZoom: () => void;
+  undo: () => Promise<void>;
+  redo: () => Promise<void>;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
+  save: (skip: boolean) => void;
 };
 
 export interface Editor {
@@ -74,11 +82,44 @@ export interface Editor {
   delete: () => void;
   addImage: (url: string) => Promise<void>;
   changeImageFilter: (filter: string) => void;
+  onCopy: () => Promise<void>;
+  onPaste: () => Promise<void>;
+  enableDrawingMode: () => void;
+  disableDrawingMode: () => void;
+  getActiveStrokeColor: () => string;
+  changeSize: (value: { width: number; height: number }) => void;
+  changeBackground: (value: string) => void;
+  getWorkspace: () => Object | undefined;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  autoZoom: () => void;
+  onUndo: () => Promise<void>;
+  onRedo: () => Promise<void>;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
+  save: (skip: boolean) => void;
+  saveSvg: () => void;
+  savePng: () => void;
+  saveJpg: () => void;
+  saveJson: () => void;
+  loadJson: (json: string) => void;
 }
 
 export interface UseEditorProps {
   clearSelectionCallback: () => void;
+  setActiveTool: () => void;
 }
+
+export const JSON_KEYS = [
+  "name",
+  "gradientAngle",
+  "selectable",
+  "hasControls",
+  "linkData",
+  "editable",
+  "extensionType",
+  "extension",
+];
 
 export const filters = [
   "none",

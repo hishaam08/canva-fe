@@ -58,7 +58,7 @@ export const FontSidebar = ({
               onMouseLeave={() => editor?.changeFontFamily(currentFont.current)}
               onClick={() => {
                 currentFont.current = font;
-                // editor?.changeFontFamily(font);
+                editor?.save(false);
               }}
             >
               {font}

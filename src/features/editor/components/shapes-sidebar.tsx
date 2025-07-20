@@ -33,38 +33,38 @@ function ShapesSidebar({
       <ScrollArea>
         <div className="grid grid-cols-3 gap-4 p-4">
           <ShapeTool
-            onDoubleClick={() => {
+            onClick={() => {
               editor?.addCircle();
             }}
             icon={FaCircle}
           />
           <ShapeTool
-            onDoubleClick={() => {
+            onClick={() => {
               editor?.addSoftRectangle();
             }}
             icon={FaSquare}
           />
           <ShapeTool
-            onDoubleClick={() => {
+            onClick={() => {
               editor?.addRectangle();
             }}
             icon={FaSquareFull}
           />
           <ShapeTool
-            onDoubleClick={() => {
+            onClick={() => {
               editor?.addTriangle();
             }}
             icon={IoTriangle}
           />
           <ShapeTool
-            onDoubleClick={() => {
+            onClick={() => {
               editor?.addInverseTriangle();
             }}
             icon={IoTriangle}
             iconClassName="rotate-180"
           />
           <ShapeTool
-            onDoubleClick={() => {
+            onClick={() => {
               editor?.addDiamond();
             }}
             icon={FaDiamond}

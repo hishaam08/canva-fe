@@ -47,7 +47,10 @@ export const FilterSidebar = ({
               onMouseLeave={() =>
                 editor?.changeImageFilter(currentFilter.current)
               }
-              onClick={() => (currentFilter.current = filter)}
+              onClick={() => {
+                currentFilter.current = filter;
+                editor?.save(false);
+              }}
             >
               {filter}
             </Button>

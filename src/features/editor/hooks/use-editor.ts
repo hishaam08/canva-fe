@@ -4,6 +4,8 @@ import {
   Circle,
   Image,
   Object,
+  PencilBrush,
+  Point,
   Polygon,
   Rect,
   Shadow,
@@ -20,6 +22,7 @@ import {
   FONT_FAMILY,
   FONT_SIZE,
   FONT_WEIGHT,
+  JSON_KEYS,
   RECTANGLE_OPTIONS,
   STROKE_COLOR,
   STROKE_DASH_ARRAY,
@@ -29,7 +32,15 @@ import {
   UseEditorProps,
 } from "../types";
 import { useCanvasEvents } from "./use-canvas-events";
-import { createFilter, isTextType } from "../utils";
+import {
+  createFilter,
+  downloadFile,
+  isTextType,
+  transformText,
+} from "../utils";
+import { useClipboard } from "./use-clipboard";
+import { useHistory } from "./use-history";
+import { useHotkeys } from "./use-hotkeys";
 
 function buildEditor({
   canvas,
@@ -44,11 +55,88 @@ function buildEditor({
   strokeDashArray,
   fontFamily,
   setFontFamily,
+  copy,
+  paste,
+  autoZoom,
+  save,
+  canRedo,
+  canUndo,
+  undo,
+  redo,
 }: BuildEditorProps): Editor {
   const getWorkspace = () => {
     return canvas
       .getObjects()
       .find((obj) => (obj as { name?: string }).name === "clip");
+  };
+
+  const generateSaveOptions = () => {
+    const { width, height, left, top } = getWorkspace() as Rect;
+
+    const dataUrlOptions = {
+      multiplier: 1,
+      format: "png" as const,
+      quality: 1,
+      left: left,
+      top: top,
+      width: width,
+      height: height,
+      name: "shapy-image",
+    };
+
+    return {
+      name: "Image",
+      dataUrlOptions,
+      workspace: { width, height, left, top },
+    };
+  };
+
+  const savePng = () => {
+    const options = generateSaveOptions();
+
+    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    const dataUrl = canvas.toDataURL(options.dataUrlOptions);
+
+    downloadFile(dataUrl, "png");
+    autoZoom();
+  };
+
+  const saveSvg = () => {
+    const options = generateSaveOptions();
+
+    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    const dataUrl = canvas.toDataURL(options.dataUrlOptions);
+
+    downloadFile(dataUrl, "svg");
+    autoZoom();
+  };
+
+  const saveJpg = () => {
+    const options = generateSaveOptions();
+
+    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    const dataUrl = canvas.toDataURL(options.dataUrlOptions);
+
+    downloadFile(dataUrl, "jpg");
+    autoZoom();
+  };
+
+  const saveJson = () => {
+    const dataUrl = canvas.toObject(JSON_KEYS);
+
+    transformText(dataUrl.objects);
+    const fileString = `data:text/json;charset=utf-8,${encodeURIComponent(
+      JSON.stringify(dataUrl, null, "\t")
+    )}`;
+    downloadFile(fileString, "json");
+  };
+
+  const loadJson = (json: string) => {
+    const data = JSON.parse(json);
+
+    canvas.loadFromJSON(data, () => {
+      autoZoom();
+    });
   };
 
   const center = (object: Object) => {
@@ -67,6 +155,73 @@ function buildEditor({
   };
 
   return {
+    saveJpg,
+    saveJson,
+    savePng,
+    saveSvg,
+    loadJson,
+    autoZoom,
+    zoomIn: () => {
+      let zoomRatio = canvas.getZoom();
+      zoomRatio += 0.05;
+      const center = canvas.getCenter();
+      canvas.zoomToPoint(
+        new Point(center.left, center.top),
+        zoomRatio > 1 ? 1 : zoomRatio
+      );
+    },
+    zoomOut: () => {
+      let zoomRatio = canvas.getZoom();
+      zoomRatio -= 0.05;
+      const center = canvas.getCenter();
+      canvas.zoomToPoint(
+        new Point(center.left, center.top),
+        zoomRatio < 0.2 ? 0.2 : zoomRatio
+      );
+    },
+    getWorkspace,
+    changeSize: (value: { width: number; height: number }) => {
+      const workspace = getWorkspace();
+
+      workspace?.set(value);
+      autoZoom();
+      save(false);
+    },
+    changeBackground: (value: string) => {
+      const workspace = getWorkspace();
+      workspace?.set({ fill: value });
+      canvas.renderAll();
+      save(false);
+    },
+    getActiveStrokeColor: () => {
+      const selectedObject = selectedObjects[0];
+
+      if (!selectedObject) {
+        return strokeColor;
+      }
+
+      const value = selectedObject.get("stroke") || strokeColor;
+
+      return value;
+    },
+    enableDrawingMode: () => {
+      canvas.discardActiveObject();
+      canvas.renderAll();
+      canvas.isDrawingMode = true;
+
+      canvas.freeDrawingBrush = new PencilBrush(canvas);
+      if (canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.width = strokeWidth;
+        canvas.freeDrawingBrush.color = strokeColor;
+      }
+    },
+    disableDrawingMode: () => {
+      canvas.isDrawingMode = false;
+    },
+    onUndo: async () => await undo(),
+    onRedo: async () => await redo(),
+    onCopy: () => copy(),
+    onPaste: () => paste(),
     changeFontFamily: (value: string) => {
       setFontFamily(value);
       canvas.getActiveObjects().forEach((obj) => {
@@ -102,6 +257,7 @@ function buildEditor({
 
         obj.set("stroke", color);
       });
+      if (canvas.freeDrawingBrush) canvas.freeDrawingBrush.color = color;
       canvas.requestRenderAll();
     },
     changeStrokeWidth: (width: number) => {
@@ -110,6 +266,7 @@ function buildEditor({
         obj.set("strokeWidth", width);
         obj.setCoords();
       });
+      if (canvas.freeDrawingBrush) canvas.freeDrawingBrush.width = width;
       canvas.requestRenderAll();
     },
     changeStrokeDashArray: (value: number[]) => {
@@ -389,6 +546,7 @@ function buildEditor({
           imageObject.applyFilters();
           canvas.renderAll();
         }
+        // save(false)
       });
     },
     addImage: async (value: string) => {
@@ -413,10 +571,16 @@ function buildEditor({
     canvas,
     selectedObjects,
     fontFamily,
+    canRedo,
+    canUndo,
+    save,
   };
 }
 
-export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
+export const useEditor = ({
+  clearSelectionCallback,
+  setActiveTool,
+}: UseEditorProps) => {
   const [canvas, setCanvas] = useState<Canvas | null>(null);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
@@ -428,12 +592,31 @@ export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
   const [strokeDashArray, setStrokeDashArray] =
     useState<number[]>(STROKE_DASH_ARRAY);
 
-  useAutoResize({ canvas, container });
-  useCanvasEvents({ canvas, setSelectedObjects, clearSelectionCallback });
+  const { autoZoom } = useAutoResize({ canvas, container });
+  const { copy, paste } = useClipboard({ canvas });
+
+  const { save, canRedo, canUndo, undo, redo, setHistoryIndex, canvasHistory } =
+    useHistory({ canvas });
+  useCanvasEvents({ canvas, setSelectedObjects, clearSelectionCallback, save });
+
+  useHotkeys({
+    setActiveTool,
+    canvas,
+    undo,
+    redo,
+    save,
+    copy,
+    paste,
+  });
 
   const editor = useMemo(() => {
     if (canvas)
       return buildEditor({
+        save,
+        canRedo,
+        canUndo,
+        undo,
+        redo,
         canvas,
         fillColor,
         strokeColor,
@@ -446,10 +629,20 @@ export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
         strokeDashArray,
         fontFamily,
         setFontFamily,
+        copy,
+        paste,
+        autoZoom,
       });
 
     return undefined;
   }, [
+    save,
+    canRedo,
+    canUndo,
+    undo,
+    redo,
+    copy,
+    paste,
     canvas,
     fillColor,
     strokeColor,
@@ -457,6 +650,7 @@ export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
     selectedObjects,
     strokeDashArray,
     fontFamily,
+    autoZoom,
   ]);
 
   const init = useCallback(
@@ -520,10 +714,14 @@ export const useEditor = ({ clearSelectionCallback }: UseEditorProps) => {
       setCanvas(initialCanvas);
       setContainer(initialContainer);
 
+      const currentState = JSON.stringify(initialCanvas.toObject(JSON_KEYS));
+      canvasHistory.current.push(currentState);
+      setHistoryIndex(0);
+
       // initialCanvas.add(test);
       // initialCanvas.centerObject(test);
     },
-    []
+    [canvasHistory, setHistoryIndex]
   );
 
   return { init, editor };

@@ -17,6 +17,8 @@ import { TextSidebar } from "./text-sidebar";
 import { FontSidebar } from "./font-sidebar";
 import { ImageSidebar } from "./image-sidebar";
 import { FilterSidebar } from "./filter-sidebar";
+import { DrawSidebar } from "./draw-sidebar";
+import { SettingsSidebar } from "./settings-sidebar";
 
 export const Editor = () => {
   const [activeTool, setActiveTool] = useState<ActiveTool>("select");
@@ -27,20 +29,34 @@ export const Editor = () => {
     }
   }, [activeTool]);
 
+  const setActiveToolToSelect = useCallback(() => {
+    setActiveTool("select");
+  }, []);
+
   const { init, editor } = useEditor({
     clearSelectionCallback: onClearSelection,
+    setActiveTool: setActiveToolToSelect,
   });
   const canvasRef = useRef(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const onChangeActiveTool = useCallback(
     (tool: ActiveTool) => {
+      if (tool === "draw") {
+        editor?.enableDrawingMode();
+      }
+
+      if (activeTool === "draw") {
+        editor?.disableDrawingMode();
+      }
+
       if (tool === activeTool) {
         return setActiveTool("select");
       }
+
       setActiveTool(tool);
     },
-    [activeTool]
+    [activeTool, editor]
   );
 
   useEffect(() => {
@@ -58,7 +74,11 @@ export const Editor = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      <Navbar activeTool={activeTool} onChangeActiveTool={onChangeActiveTool} />
+      <Navbar
+        activeTool={activeTool}
+        onChangeActiveTool={onChangeActiveTool}
+        editor={editor}
+      />
       <div className="flex flex-1 min-h-0">
         <Sidebar
           activeTool={activeTool}
@@ -109,6 +129,16 @@ export const Editor = () => {
           activeTool={activeTool}
           onChangeActiveTool={onChangeActiveTool}
         />
+        <DrawSidebar
+          editor={editor}
+          activeTool={activeTool}
+          onChangeActiveTool={onChangeActiveTool}
+        />
+        <SettingsSidebar
+          editor={editor}
+          activeTool={activeTool}
+          onChangeActiveTool={onChangeActiveTool}
+        />
         <main className="flex flex-1 min-w-0 flex-col bg-muted">
           <Toolbar
             editor={editor}
@@ -119,7 +149,7 @@ export const Editor = () => {
           <div ref={containerRef} className="flex-1 min-h-0 bg-muted">
             <canvas ref={canvasRef} />
           </div>
-          <Footer />
+          <Footer editor={editor} />
         </main>
       </div>
     </div>

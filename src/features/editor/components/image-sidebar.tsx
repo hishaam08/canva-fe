@@ -24,8 +24,7 @@ export const ImageSidebar = ({
   activeTool,
   onChangeActiveTool,
 }: ImageSidebarProps) => {
-  const { data, isLoading, isError } = useGetImages(activeTool === "images");
-  console.log(data);
+  const { data, isLoading, isError } = useGetImages();
 
   const onClose = () => {
     onChangeActiveTool("select");
