@@ -8,6 +8,13 @@
       "when": 1752998373434,
       "tag": "0000_free_hellcat",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1753714848146,
+      "tag": "0001_white_power_pack",
+      "breakpoints": true
     }
   ]
 }

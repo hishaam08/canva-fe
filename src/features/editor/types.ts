@@ -106,8 +106,16 @@ export interface Editor {
 }
 
 export interface UseEditorProps {
+  defaultState?: string;
+  defaultWidth?: number;
+  defaultHeight?: number;
   clearSelectionCallback: () => void;
   setActiveTool: () => void;
+  saveCallback?: (values: {
+    json: string;
+    height: number;
+    width: number;
+  }) => void;
 }
 
 export const JSON_KEYS = [

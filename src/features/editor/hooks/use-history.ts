@@ -4,9 +4,14 @@ import { Canvas } from "fabric";
 
 interface UseHistoryProps {
   canvas: Canvas | null;
+  saveCallback?: (values: {
+    json: string;
+    height: number;
+    width: number;
+  }) => void;
 }
 
-export const useHistory = ({ canvas }: UseHistoryProps) => {
+export const useHistory = ({ canvas, saveCallback }: UseHistoryProps) => {
   const [historyIndex, setHistoryIndex] = useState(0);
   const canvasHistory = useRef<string[]>([]);
   const isUndoRedo = useRef(false);
@@ -25,9 +30,9 @@ export const useHistory = ({ canvas }: UseHistoryProps) => {
 
       // Don't save if we're in the middle of undo/redo operations
       if (isUndoRedo.current || skip) {
-        console.log("save skipped", { 
-          isUndoRedo: isUndoRedo.current, 
-          skip 
+        console.log("save skipped", {
+          isUndoRedo: isUndoRedo.current,
+          skip,
         });
         return;
       }
@@ -37,20 +42,29 @@ export const useHistory = ({ canvas }: UseHistoryProps) => {
 
       // Remove any history after current index (when user makes new changes after undo)
       if (historyIndex < canvasHistory.current.length - 1) {
-        canvasHistory.current = canvasHistory.current.slice(0, historyIndex + 1);
+        canvasHistory.current = canvasHistory.current.slice(
+          0,
+          historyIndex + 1
+        );
       }
 
-      console.log("saving to history", canvasHistory.current.length);
       canvasHistory.current.push(json);
       setHistoryIndex(canvasHistory.current.length - 1);
+
+      const workspace = canvas
+        .getObjects()
+        .find((obj) => (obj as { name?: string }).name === "clip");
+      const height = workspace?.height || 0;
+      const width = workspace?.width || 0;
+
+      saveCallback?.({ json, height, width });
     },
-    [canvas, historyIndex]
+    [canvas, historyIndex, saveCallback]
   );
 
   const undo = useCallback(async () => {
     if (!canUndo() || !canvas) return;
 
-    console.log("undo triggered");
     isUndoRedo.current = true;
 
     try {
@@ -62,12 +76,10 @@ export const useHistory = ({ canvas }: UseHistoryProps) => {
 
       // Load previous state using Promise-based API (Fabric v6)
       await canvas.loadFromJSON(previousState);
-      
+
       // Render and update state
       canvas.renderAll();
       setHistoryIndex(previousIndex);
-      
-      console.log("undo completed");
     } catch (error) {
       console.error("Undo failed:", error);
     } finally {
@@ -78,7 +90,6 @@ export const useHistory = ({ canvas }: UseHistoryProps) => {
   const redo = useCallback(async () => {
     if (!canRedo() || !canvas) return;
 
-    console.log("redo triggered");
     isUndoRedo.current = true;
 
     try {
@@ -90,12 +101,10 @@ export const useHistory = ({ canvas }: UseHistoryProps) => {
 
       // Load next state using Promise-based API (Fabric v6)
       await canvas.loadFromJSON(nextState);
-      
+
       // Render and update state
       canvas.renderAll();
       setHistoryIndex(nextIndex);
-      
-      console.log("redo completed");
     } catch (error) {
       console.error("Redo failed:", error);
     } finally {

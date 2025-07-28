@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Canvas,
   Circle,
@@ -41,6 +41,7 @@ import {
 import { useClipboard } from "./use-clipboard";
 import { useHistory } from "./use-history";
 import { useHotkeys } from "./use-hotkeys";
+import { useLoadState } from "./use-load-state";
 
 function buildEditor({
   canvas,
@@ -578,9 +579,17 @@ function buildEditor({
 }
 
 export const useEditor = ({
+  defaultState,
+  defaultHeight,
+  defaultWidth,
   clearSelectionCallback,
   setActiveTool,
+  saveCallback,
 }: UseEditorProps) => {
+  const initialState = useRef(defaultState);
+  const initialWidth = useRef(defaultWidth);
+  const initialHeight = useRef(defaultHeight);
+
   const [canvas, setCanvas] = useState<Canvas | null>(null);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
@@ -596,7 +605,7 @@ export const useEditor = ({
   const { copy, paste } = useClipboard({ canvas });
 
   const { save, canRedo, canUndo, undo, redo, setHistoryIndex, canvasHistory } =
-    useHistory({ canvas });
+    useHistory({ canvas, saveCallback });
   useCanvasEvents({ canvas, setSelectedObjects, clearSelectionCallback, save });
 
   useHotkeys({
@@ -607,6 +616,14 @@ export const useEditor = ({
     save,
     copy,
     paste,
+  });
+
+  useLoadState({
+    canvas,
+    autoZoom,
+    initialState,
+    canvasHistory,
+    setHistoryIndex,
   });
 
   const editor = useMemo(() => {
@@ -695,8 +712,8 @@ export const useEditor = ({
       };
 
       const initialWorkspace = new Rect({
-        width: 1200,
-        height: 1200,
+        width: initialWidth.current,
+        height: initialHeight.current,
         name: "clip",
         fill: "white",
         selectable: false,
